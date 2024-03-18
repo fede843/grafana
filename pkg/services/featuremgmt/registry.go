@@ -257,6 +257,7 @@ var (
 			Description: "Enable folder nesting",
 			Stage:       FeatureStagePublicPreview,
 			Owner:       grafanaBackendPlatformSquad,
+			Expression:  "true", // enabled by default
 		},
 		{
 			Name:           "nestedFolderPicker",
