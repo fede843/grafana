@@ -1,0 +1,38 @@
+//  
+//  ERROR: db has no time column: no time column found
+//  Frame[0] {
+//      "typeVersion": [
+//          0,
+//          0
+//      ],
+//      "executedQueryString": "SELECT UNIX_TIMESTAMP(\"time\") DIV 300 * 300,c,avg(v) AS \"v\" FROM tbl GROUP BY 1,2 ORDER BY 1,2"
+//  }
+//  Name: 
+//  Dimensions: 0 Fields by 0 Rows
+//  +
+//  +
+//  
+//  
+//  🌟 This was machine generated.  Do not edit. 🌟
+{
+  "error": "db has no time column: no time column found",
+  "errorSource": "",
+  "status": 500,
+  "frames": [
+    {
+      "schema": {
+        "meta": {
+          "typeVersion": [
+            0,
+            0
+          ],
+          "executedQueryString": "SELECT UNIX_TIMESTAMP(\"time\") DIV 300 * 300,c,avg(v) AS \"v\" FROM tbl GROUP BY 1,2 ORDER BY 1,2"
+        },
+        "fields": []
+      },
+      "data": {
+        "values": []
+      }
+    }
+  ]
+}
