@@ -190,11 +190,6 @@ func (fr *FileReader) storeDashboardsInFoldersFromFileStructureOld(ctx context.C
 	for path, fileInfo := range filesFoundOnDisk {
 		folderName := ""
 
-		dashboardsFolder := filepath.Dir(path)
-		if dashboardsFolder != resolvedPath {
-			folderName = filepath.Base(dashboardsFolder)
-		}
-
 		folderID, folderUID, err := fr.getOrCreateFolder(ctx, fr.Cfg, fr.dashboardProvisioningService, folderName)
 		if err != nil && !errors.Is(err, ErrFolderNameMissing) {
 			return fmt.Errorf("can't provision folder %q from file system structure: %w", folderName, err)
@@ -213,16 +208,25 @@ func (fr *FileReader) storeDashboardsInFoldersFromFileStructureOld(ctx context.C
 // in Grafana as they are in on the filesystem.
 func (fr *FileReader) storeDashboardsInFoldersFromFileStructure(ctx context.Context, filesFoundOnDisk map[string]os.FileInfo,
 	dashboardRefs map[string]*dashboards.DashboardProvisioning, resolvedPath string, usageTracker *usageTracker) error {
-	for path, fileInfo := range filesFoundOnDisk {
-		folderFullPath := filepath.Dir(path)
-		folderTitles := folderimpl.SplitFullpath(strings.TrimPrefix(folderFullPath, resolvedPath))
 
-		if len(folderTitles) == 0 {
-			return fmt.Errorf("invalid folder fullpath: %s", path)
+	for filePath, fileInfo := range filesFoundOnDisk {
+		folderPath := filepath.Dir(filePath)
+		// if resolvedPath happen to be a path to a file instead of a directory, remove the file name from the path
+		if filePath == resolvedPath {
+			resolvedPath = filepath.Dir(resolvedPath)
 		}
+
+		folderTitles := folderimpl.SplitFullpath(strings.TrimPrefix(folderPath, resolvedPath))
 
 		var folderID int64
 		var folderUID *string
+
+		// TODO: move this to saveDashboard maybe?
+		// If folderTitles is empty, then dashboard should be saved in the root folder
+		if len(folderTitles) == 0 {
+			folderID, folderUID = folder.GeneralFolder.ID, &folder.GeneralFolder.UID
+		}
+
 		for i := range folderTitles {
 			id, uid, err := fr.getOrCreateFolderByTitle(ctx, folderTitles[i], fr.Cfg.OrgID, folderUID)
 			if err != nil {
@@ -232,10 +236,10 @@ func (fr *FileReader) storeDashboardsInFoldersFromFileStructure(ctx context.Cont
 			folderUID = &uid
 		}
 
-		provisioningMetadata, err := fr.saveDashboard(ctx, path, folderID, *folderUID, fileInfo, dashboardRefs)
+		provisioningMetadata, err := fr.saveDashboard(ctx, filePath, folderID, *folderUID, fileInfo, dashboardRefs)
 		usageTracker.track(provisioningMetadata)
 		if err != nil {
-			fr.log.Error("failed to save dashboard", "file", path, "error", err)
+			fr.log.Error("failed to save dashboard", "file", filePath, "error", err)
 		}
 	}
 	return nil
