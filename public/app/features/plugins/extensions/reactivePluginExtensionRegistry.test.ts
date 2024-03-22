@@ -22,6 +22,76 @@ describe('createPluginExtensionsRegistry', () => {
     });
   });
 
+  it('should generate an id for the registry once we register an extension to it', async () => {
+    const pluginId = 'grafana-basic-app';
+    const extensionPointId = 'grafana/dashboard/panel/menu';
+    const reactiveRegistry = new ReactivePluginExtensionsRegistry();
+
+    reactiveRegistry.register({
+      pluginId,
+      extensionConfigs: [
+        {
+          type: PluginExtensionTypes.link,
+          title: 'Link 1',
+          description: 'Link 1 description',
+          path: `/a/${pluginId}/declare-incident`,
+          extensionPointId,
+          configure: jest.fn().mockReturnValue({}),
+        },
+      ],
+    });
+
+    const registry = await reactiveRegistry.getRegistry();
+
+    expect(registry.id).toBeDefined();
+    expect(registry.extensions[extensionPointId]).toHaveLength(1);
+  });
+
+  it('should generate an a new id every time the registry changes', async () => {
+    const pluginId = 'grafana-basic-app';
+    const extensionPointId = 'grafana/dashboard/panel/menu';
+    const reactiveRegistry = new ReactivePluginExtensionsRegistry();
+
+    reactiveRegistry.register({
+      pluginId,
+      extensionConfigs: [
+        {
+          type: PluginExtensionTypes.link,
+          title: 'Link 1',
+          description: 'Link 1 description',
+          path: `/a/${pluginId}/declare-incident`,
+          extensionPointId,
+          configure: jest.fn().mockReturnValue({}),
+        },
+      ],
+    });
+
+    const registry1 = await reactiveRegistry.getRegistry();
+    const id1 = registry1.id;
+
+    expect(id1).toBeDefined();
+
+    reactiveRegistry.register({
+      pluginId,
+      extensionConfigs: [
+        {
+          type: PluginExtensionTypes.link,
+          title: 'Link 2',
+          description: 'Link 2 description',
+          path: `/a/${pluginId}/declare-incident`,
+          extensionPointId,
+          configure: jest.fn().mockReturnValue({}),
+        },
+      ],
+    });
+
+    const registry2 = await reactiveRegistry.getRegistry();
+    const id2 = registry2.id;
+
+    expect(id2).toBeDefined();
+    expect(id2).not.toEqual(id1);
+  });
+
   it('should be possible to register extensions in the registry', async () => {
     const pluginId = 'grafana-basic-app';
     const reactiveRegistry = new ReactivePluginExtensionsRegistry();
