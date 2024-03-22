@@ -10,7 +10,6 @@ import { EXTENSIONS_PRIORITY } from '../values';
 const context: PluginExtensionCommandPaletteContext = {};
 
 export default function useExtensionActions(): CommandPaletteAction[] {
-  const context: PluginExtensionCommandPaletteContext = {};
   const { extensions } = usePluginLinkExtensions({
     extensionPointId: PluginExtensionPoints.CommandPalette,
     context,

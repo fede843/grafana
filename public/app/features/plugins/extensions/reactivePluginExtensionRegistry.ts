@@ -19,8 +19,8 @@ export class ReactivePluginExtensionsRegistry {
     this.resultSubject
       .pipe(
         scan(resultsToRegistry, { id: '', extensions: {} }),
-        // Emit an empty object to start the stream (it is only going to do it once during construction, and then just passes down the values)
-        startWith({}),
+        // Emit an empty registry to start the stream (it is only going to do it once during construction, and then just passes down the values)
+        startWith({ id: '', extensions: {} }),
         map((registry) => deepFreeze(registry))
       )
       // Emitting the new registry to `this.registrySubject`
